@@ -16,7 +16,7 @@ session_start();
 
 <div data-role="page" id="wsdebug">
 <div data-role="header">
-<a href="index.php" data-ajax="false" data-rel="back" data-transition="slide" class="ui-btn ui-corner-all ui-btn-inline">Go Back</a>
+<a href="/index.php" data-ajax="false" data-rel="back" data-transition="slide" class="ui-btn ui-corner-all ui-btn-inline">Go Back</a>
 <h1>PS3Config</h1>
 </div>
 
