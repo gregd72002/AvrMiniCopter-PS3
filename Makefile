@@ -22,6 +22,8 @@ ps3controller: $(OBJ_PS3CONTROLLER)
 	$(CC) $(CFLAGS) $(OBJ_PS3CONTROLLER) -o ps3controller $(LDFLAGS) $(CC_OPTS) 
 
 install:
+	$(INSTALL) -m 0755 -d $(DESTDIR)/var/www/addons
+	$(INSTALL) -m 755 utils/www/* $(DESTDIR)/var/www/addons/
 	$(INSTALL) -m 0755 -d $(DESTDIR)/usr/local/bin
 	$(INSTALL) -m 755 ps3controller $(DESTDIR)/usr/local/bin/
 	$(INSTALL) -m 755 utils/ps3controller.sh $(DESTDIR)/usr/local/bin/
@@ -29,6 +31,7 @@ install:
 	$(INSTALL) -m 755 utils/ps3vidsnap.sh $(DESTDIR)/usr/local/bin/
 	$(INSTALL) -m 755 utils/S99ps3controller $(DESTDIR)/etc/init.d/
 	$(INSTALL) -m 755 utils/ps3.config $(DESTDIR)/etc/avrminicopter/
+
 
 clean:
 	rm -rf ps3controller 
