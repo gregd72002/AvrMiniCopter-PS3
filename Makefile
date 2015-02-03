@@ -24,6 +24,9 @@ ps3controller: $(OBJ_PS3CONTROLLER)
 install:
 	$(INSTALL) -m 0755 -d $(DESTDIR)/usr/local/bin
 	$(INSTALL) -m 755 ps3controller $(DESTDIR)/usr/local/bin/
+	$(INSTALL) -m 755 ps3controller.sh $(DESTDIR)/usr/local/bin/
+	$(INSTALL) -m 755 S99ps3controller $(DESTDIR)/etc/init.d/
+	$(INSTALL) -m 755 ps3.config $(DESTDIR)/etc/avrminicopter/
 
 clean:
 	rm -rf ps3controller 
