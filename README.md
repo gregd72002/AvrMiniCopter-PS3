@@ -2,6 +2,8 @@
 
 This is a bluetooth based controller for AvrMiniCopter for PS3 gamepad.
 
+If you do not know AvrMiniCopter please refer to the wiki: https://github.com/rpicopter/AvrMiniCopter-wiki/wiki
+
 You will need bluetooth USB dongle connected to your AvrMiniCopter.
 
 PS3 gamepad button mapping: https://github.com/rpicopter/AvrMiniCopter-PS3/wiki/Controls
