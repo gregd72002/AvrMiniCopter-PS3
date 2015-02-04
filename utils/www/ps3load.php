@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', True);
-@include "config.php";
+@include "../config.php";
 $f = $config_path.'ps3.config';
 $c = [];
 

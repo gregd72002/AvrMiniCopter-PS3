@@ -7,16 +7,16 @@ session_start();
 <head>
 <title>PS3 Config</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="jquery/jquery.mobile-1.4.3.min.css" />
-<script src="jquery/jquery-1.11.1.min.js"></script>
-<script src="jquery/jquery.mobile-1.4.3.min.js"></script>
+<link rel="stylesheet" href="../jquery/jquery.mobile-1.4.3.min.css" />
+<script src="../jquery/jquery-1.11.1.min.js"></script>
+<script src="../jquery/jquery.mobile-1.4.3.min.js"></script>
 </script>
 </head>
 <body>
 
 <div data-role="page" id="wsdebug">
 <div data-role="header">
-<a href="/index.php" data-ajax="false" data-rel="back" data-transition="slide" class="ui-btn ui-corner-all ui-btn-inline">Go Back</a>
+<a href="../index.php" data-ajax="false" data-rel="back" data-transition="slide" class="ui-btn ui-corner-all ui-btn-inline">Go Back</a>
 <h1>PS3Config</h1>
 </div>
 
