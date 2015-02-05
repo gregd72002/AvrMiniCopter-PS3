@@ -8,7 +8,7 @@ You will need bluetooth USB dongle connected to your AvrMiniCopter.
 
 PS3 gamepad button mapping: https://github.com/rpicopter/AvrMiniCopter-PS3/wiki/Controls
 
-Pairing instructions:
+##### Pairing instructions:
 * Boot AvrMiniCopter with Bluetooth USB dongle plugged in but PS3 controller disconnected; AvrMiniCopter will remember the dongle's MAC address
 * Power off AvrMiniCopter disconnect Bluetooth dongle and plug in a switched off PS3 controller over USB cable instead
 * Power on - PS3 controller LEDs should start to blink; this means pairing is successfull
