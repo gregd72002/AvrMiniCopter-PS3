@@ -7,8 +7,9 @@
 #include <string.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <sys/un.h>
 #include <netdb.h>
 #include <stdlib.h>
 #include <time.h>
@@ -42,11 +43,10 @@ int alt_hold = 0;
 int throttle_hold = 0;
 int throttle_target = 0;
 
-int sock = 0;
-char sock_path[256] = "127.0.0.1";
-int portno = 1030;
-struct sockaddr_in address;
-struct hostent *server;
+int sock = 0,len;
+uint8_t sock_type = 0;
+char sock_path[256] = "/dev/avrspi";
+struct sockaddr_un address;
 
 int nocontroller = 0;
 int cam_seq = 0;
@@ -74,46 +74,45 @@ int sendMsg(int t, int v) {
 }
 
 
+void processMsg(struct local_msg *m) {
+	if (m->c == 1) {
+		printf("Disconnect request.\n");
+		stop = 1;
+	} else {
+		//printf("Recieved t: %u v: %i\n",m->t,m->v);
+	}
+}
+
 void recvMsgs() {
-	static int sel=0,i=0,ret=0;
-	static unsigned char buf[4];
-	static struct avr_msg m;
+	static int i=0,ret=0;
+	static unsigned char buf[256];
+	static int buf_c = 0;
+	static struct local_msg msg;
+	static int count = 0;
 
-	static fd_set fds;
-	static struct timeval timeout;
 
-	do {
-		FD_ZERO(&fds);
-		FD_SET(sock,&fds);
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 0;
-		sel = select( sock + 1 , &fds , NULL , NULL , &timeout);
-		if ((sel<0) && (errno!=EINTR)) {
-			perror("select");
-			stop=1;
+	if (ioctl(sock, TIOCINQ, &count)!=0) {
+		printf("Ioctl failed.\n");
+		stop = 1;
+	} else if (count) {
+		ret = read(sock,buf,256);
+		buf_c += ret;
+
+		int msg_no = buf_c / LOCAL_MSG_SIZE;
+		int reminder = buf_c % LOCAL_MSG_SIZE;
+		for (i=0;i<msg_no;i++) {
+			unpack_lm(buf+i*LOCAL_MSG_SIZE,&msg);
+			processMsg(&msg);
 		}
-		else if (sel && !stop && FD_ISSET(sock, &fds)) {
-			ret = read(sock,buf+i,4-i);
-			if (ret<0) {
-				perror("reading");
-				stop = 1;
-			}
-			else {
-				i+=ret;
-				if (i==4) {
-					if (buf[0] == 1) {
-						if (verbose) printf("Disconnect request.\n");
-						stop = 1;	
-					} else {
-						m.t = buf[1];
-						m.v = unpacki16(buf+2);
-						avr_s[m.t] = m.v;
-						i = 0;
-					}
-				}
-			}
+
+		if (msg_no) {
+			for (i=0;i<reminder;i++)
+				buf[i] = buf[msg_no*LOCAL_MSG_SIZE+i];
+				buf_c = reminder;
 		}
-	} while (!stop && sel && ret>0); //no error happened; select picked up socket state change; read got some data back
+
+	}
+
 }
 
 void reset_avr() {
@@ -321,8 +320,7 @@ void loop() {
 
 void print_usage() {
 	printf("-v [level] - verbose mode\n");
-	printf("-a [addr] - address to connect to (defaults to 127.0.0.1)\n");
-	printf("-p [port] - port to connect to (default to 1030)\n");
+	printf("-u [SOCKET] - socket to connect to (defaults to %s)\n",sock_path);
 	printf("-f - do not initialize joystic\n");
 }
 
@@ -333,12 +331,11 @@ int main(int argc, char **argv) {
 
 	int option;
 	verbose = 0;
-	while ((option = getopt(argc, argv,"v:a:p:f")) != -1) {
+	while ((option = getopt(argc, argv,"v:u::f")) != -1) {
 		switch (option)  {
 			case 'v': verbose=atoi(optarg); break;
 			case 'f': nocontroller = 1; break;
-			case 'a': strcpy(sock_path,optarg); break;
-			case 'p': portno = atoi(optarg); break;
+			case 'u': strcpy(sock_path,optarg); break;
 			default:
 				  print_usage();
 				  return -1;
@@ -351,28 +348,28 @@ int main(int argc, char **argv) {
 	if (verbose) printf("Opening socket...\n");
 
 	/* Create socket on which to send. */
-	sock = socket(AF_INET, SOCK_STREAM, 0);
+	sock = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (sock < 0) {
 		perror("opening socket");
 		exit(1);
 	}
-	server = gethostbyname(sock_path);
-	if (server == NULL) {
-		fprintf(stderr,"ERROR, no such host\n");
-		return -1;
-	}
 	bzero((char *) &address, sizeof(address));
-	address.sin_family = AF_INET;
-	bcopy((char *)server->h_addr,
-			(char *)&address.sin_addr.s_addr,
-			server->h_length);
-	address.sin_port = htons(portno);
+	address.sun_family = AF_UNIX;
+	strcpy(address.sun_path, sock_path);
+	len = strlen(address.sun_path) + sizeof(address.sun_family);
 
-	if (connect(sock, (struct sockaddr *) &address, sizeof(struct sockaddr_in)) < 0) {
-		close(sock);
+	if (connect(sock, (struct sockaddr *) &address, len) < 0) {
 		perror("connecting socket");
+		close(sock);
 		exit(1);
 	}
+
+	if (write(sock,&sock_type,1)!=1) {
+		perror("writing to socket");
+		close(sock);
+		exit(1);
+	}
+	
 
 	/* set non-blocking
 	   ret = fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK);
@@ -418,3 +415,4 @@ int main(int argc, char **argv) {
 	if (verbose) printf("Closing.\n");
 	return 0;
 }
+
