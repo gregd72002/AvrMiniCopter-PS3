@@ -95,7 +95,7 @@ void recvMsgs() {
 		printf("Ioctl failed.\n");
 		stop = 1;
 	} else if (count) {
-		ret = read(sock,buf,256);
+		ret = read(sock,buf+buf_c,256-buf_c);
 		buf_c += ret;
 
 		int msg_no = buf_c / LOCAL_MSG_SIZE;
