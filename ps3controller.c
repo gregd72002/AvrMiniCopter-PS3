@@ -75,11 +75,11 @@ int sendMsg(int t, int v) {
 
 
 void processMsg(struct local_msg *m) {
+	//printf("Recieved t: %u v: %i\n",m->t,m->v);
+
 	if (m->c == 1) {
 		printf("Disconnect request.\n");
 		stop = 1;
-	} else {
-		//printf("Recieved t: %u v: %i\n",m->t,m->v);
 	}
 }
 
