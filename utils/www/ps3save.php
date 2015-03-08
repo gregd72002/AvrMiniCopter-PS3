@@ -1,6 +1,6 @@
 <?php
 session_start();
-@include("../ps3load.php");
+@include("ps3load.php");
 
 if (isset($_GET['tag'])) {
 	$hash = $_GET['tag'];
